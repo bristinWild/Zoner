@@ -25,4 +25,5 @@ Needs Foundry (`forge`) on PATH for `init`/`deploy`.
 
 - `SOLIZONE_NODE`: path to the `solizone_node` binary (default: next to the zoner binary, else PATH)
 - `FORGE_FLAGS`: extra flags passed to forge (e.g. `--use /path/to/solc`)
+- chain data lives in `~/.zoner` (override with `zoner node --data-dir DIR`)
 - default RPC: `http://127.0.0.1:8545`

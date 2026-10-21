@@ -117,9 +117,25 @@ fn node_binary() -> PathBuf {
 }
 
 fn node(mut args: Vec<String>) -> Result<ExitCode, String> {
+    // Flags go after a leading subcommand such as `reset`, if there is one.
+    let at = usize::from(args.first().is_some_and(|arg| !arg.starts_with('-')));
+
     // Local development defaults to local storage: no Basecamp needed.
     if !args.iter().any(|arg| arg == "--storage") {
-        args.splice(0..0, ["--storage".to_string(), "local".to_string()]);
+        args.splice(at..at, ["--storage".to_string(), "local".to_string()]);
+    }
+
+    // Keep chain data out of whatever folder the command runs in.
+    if !args.iter().any(|arg| arg == "--data-dir")
+        && let Some(dir) = default_data_dir()
+    {
+        fs::create_dir_all(&dir)
+            .map_err(|error| format!("failed to create {}: {error}", dir.display()))?;
+
+        args.splice(
+            at..at,
+            ["--data-dir".to_string(), dir.to_string_lossy().into_owned()],
+        );
     }
 
     let binary = node_binary();
@@ -127,9 +143,20 @@ fn node(mut args: Vec<String>) -> Result<ExitCode, String> {
     let status = Process::new(&binary)
         .args(&args)
         .status()
-        .map_err(|error| format!("failed to start {}: {error}", binary.display()))?;
+        .map_err(|error| {
+            format!(
+                "failed to start {} ({error}); set SOLIZONE_NODE to the solizone_node \
+             binary or put it on PATH",
+                binary.display()
+            )
+        })?;
 
     Ok(exit_code(status))
+}
+
+/// `~/.zoner`, where `zoner node` keeps chain data unless told otherwise.
+fn default_data_dir() -> Option<PathBuf> {
+    env::var_os("HOME").map(|home| PathBuf::from(home).join(".zoner"))
 }
 
 fn deploy(options: &zoner::DeployOptions) -> Result<ExitCode, String> {
