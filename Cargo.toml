@@ -1,0 +1,10 @@
+[package]
+name = "zoner"
+version = "0.1.0"
+edition = "2024"
+description = "Thin companion to Foundry for Solizone EVM"
+
+[dependencies]
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+jsonrpsee = { version = "0.26.1", features = ["http-client"] }
