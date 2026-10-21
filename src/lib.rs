@@ -95,6 +95,8 @@ zoner: Solizone companion for Foundry
 usage:
   zoner init [DIR]                      create a Foundry project configured for Solizone
   zoner node [solizone_node flags...]   start a local node (default: --storage local)
+  zoner sync [solizone_node flags...]   rebuild the chain from Logos (empty data dir),
+                                        verifying every block, then run the node
   zoner deploy CONTRACT [--rpc URL] [--account N | --private-key KEY]
                         [--constructor-args ARG...]
   zoner status [--rpc URL]              block height and Logos publication status
@@ -118,6 +120,16 @@ pub fn parse(args: &[String]) -> Result<Command, String> {
         "node" => Ok(Command::Node {
             args: rest.to_vec(),
         }),
+        // Rebuild the chain from Logos, then run the node on top of it.
+        "sync" => {
+            let mut args = rest.to_vec();
+
+            if !args.iter().any(|arg| arg == "--sync-from-logos") {
+                args.push("--sync-from-logos".to_string());
+            }
+
+            Ok(Command::Node { args })
+        }
         "deploy" => parse_deploy(rest).map(Command::Deploy),
         "status" => {
             let mut rpc = DEFAULT_RPC.to_string();
@@ -361,6 +373,23 @@ mod tests {
             parse(&args(&["node", "--publish", "--block-time", "1"])).unwrap(),
             Command::Node {
                 args: args(&["--publish", "--block-time", "1"])
+            }
+        );
+    }
+
+    #[test]
+    fn sync_is_node_with_sync_from_logos() {
+        assert_eq!(
+            parse(&args(&["sync", "--logos-node", "http://x:8080"])).unwrap(),
+            Command::Node {
+                args: args(&["--logos-node", "http://x:8080", "--sync-from-logos"])
+            }
+        );
+        // Not added twice.
+        assert_eq!(
+            parse(&args(&["sync", "--sync-from-logos"])).unwrap(),
+            Command::Node {
+                args: args(&["--sync-from-logos"])
             }
         );
     }

@@ -16,6 +16,8 @@ Needs Foundry (`forge`) on PATH for `init`/`deploy`.
 
     zoner init [DIR]            new Foundry project preconfigured for Solizone (chain 9001)
     zoner node [flags]          run solizone_node (defaults to --storage local)
+    zoner sync [flags]          rebuild the chain from Logos (needs an empty data dir;
+                                `zoner node reset` first), verify every block, then run
     zoner deploy CONTRACT       forge create against the node
         [--rpc URL] [--account N | --private-key K] [--constructor-args ...]
     zoner status [--rpc URL]    chain id, head, publication status

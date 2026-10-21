@@ -3,6 +3,7 @@
 //! ```text
 //! zoner init [DIR]
 //! zoner node [solizone_node flags...]
+//! zoner sync [solizone_node flags...]
 //! zoner deploy CONTRACT [--rpc URL] [--account N | --private-key KEY] [--constructor-args ARG...]
 //! zoner status [--rpc URL]
 //! zoner accounts
